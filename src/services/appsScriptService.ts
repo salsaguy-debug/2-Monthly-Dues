@@ -18,12 +18,14 @@ export interface AppsScriptFetchResult {
 }
 
 const APPS_SCRIPT_URL_STORAGE_KEY = 'tradicion_apps_script_url';
+export const DEFAULT_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaSTJS17v0NL_IP-aGuGE_MRSJA4cUsSGWnsa8qC5ZgSb_68H5Xcd0-J1BAZazqQgP/exec';
 
 export function getSavedAppsScriptUrl(): string {
   const saved = localStorage.getItem(APPS_SCRIPT_URL_STORAGE_KEY);
   if (saved && saved.trim()) return saved.trim();
   const envUrl = ((import.meta as unknown as { env?: Record<string, string> }).env?.VITE_APPS_SCRIPT_URL as string) || '';
-  return envUrl.trim();
+  if (envUrl && envUrl.trim()) return envUrl.trim();
+  return DEFAULT_APPS_SCRIPT_URL;
 }
 
 export function saveAppsScriptUrl(url: string): void {
