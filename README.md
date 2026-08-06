@@ -8,6 +8,8 @@ An executive-grade financial management platform, performer monthly dues tracker
 ![Vite](https://img.shields.io/badge/Vite-6.2-646CFF.svg?logo=vite)
 ![TailwindCSS v4](https://img.shields.io/badge/TailwindCSS-v4.1-38B2AC.svg?logo=tailwind-css)
 
+![Build Status](https://github.com/salsaguy-debug/2-Monthly-Dues/workflows/Deploy%20to%20GitHub%20Pages/badge.svg)
+
 ---
 
 ## ✨ Key Features
