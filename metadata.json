@@ -1,0 +1,6 @@
+{
+  "name": "Tradición Financial System",
+  "description": "Tradición Financial System 7.0.0 modular financial ledger, payment intake, performer dues tracking, and executive summary dashboard with Bento Grid layout.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

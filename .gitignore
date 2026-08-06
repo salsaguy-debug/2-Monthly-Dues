@@ -1,0 +1,18 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Firebase configuration
+firebase-applet-config.json
+!firebase-applet-config.example.json
+
+# IDE and OS files
+.vscode/
+.idea/
+*.swp
+*.swo
