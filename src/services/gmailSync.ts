@@ -61,7 +61,9 @@ export function extractNameFromEmailText(
   const cleanSub = subject.replace(/Fwd:|Re:|\[.*?\]/gi, '').trim();
   const lowerSub = cleanSub.toLowerCase();
 
-  if (lowerSub.includes('paid you')) {
+  if (lowerSub.includes('new text message from')) {
+    rawPayer = cleanSub.split(/new text message from/i)[1].replace(/\(\d{3}\).*/, '').trim();
+  } else if (lowerSub.includes('paid you')) {
     rawPayer = cleanSub.split(/paid you/i)[0].trim();
   } else if (lowerSub.includes('sent you')) {
     rawPayer = cleanSub.split(/sent you/i)[0].trim();
@@ -71,6 +73,11 @@ export function extractNameFromEmailText(
     // Regex parsing across lines
     const lines = fullText.split(/(?:\r?\n|\. )/);
     for (const line of lines) {
+      const gvoiceMatch = line.match(/(?:SMS|Text) from ([A-Za-zÀ-ÖØ-öø-ÿ \'\.\-]+)/i);
+      if (gvoiceMatch && gvoiceMatch[1]) {
+        rawPayer = gvoiceMatch[1].trim();
+        break;
+      }
       const paidMatch = line.match(/([A-Za-zÀ-ÖØ-öø-ÿ \'\.\-]+) paid you/i);
       if (paidMatch && paidMatch[1]) {
         rawPayer = paidMatch[1].trim();
@@ -108,8 +115,8 @@ export async function syncGmailPayments(
   existingPayments: PaymentRecord[],
   customQuery?: string
 ): Promise<{ newPayments: PaymentRecord[]; syncedCount: number }> {
-  // Query Gmail API for payment notifications without restrictive date bounds
-  const defaultQuery = '(from:venmo@venmo.com OR from:cash@square.com OR from:salsaguy@salsarichmond.com OR Venmo OR "Cash App" OR "Salsa Richmond" OR "paid you" OR "sent you")';
+  // Query Gmail API for payment notifications and Google Voice text messages
+  const defaultQuery = '(from:txt.voice.google.com OR "Google Voice" OR from:venmo@venmo.com OR from:cash@square.com OR from:salsaguy@salsarichmond.com OR Venmo OR "Cash App" OR "Salsa Richmond" OR "paid you" OR "sent you")';
   const query = encodeURIComponent(customQuery || defaultQuery);
   const listUrl = `https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${query}&maxResults=100`;
 

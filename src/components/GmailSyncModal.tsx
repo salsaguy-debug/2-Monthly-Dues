@@ -296,6 +296,13 @@ export const GmailSyncModal: React.FC<GmailSyncModalProps> = ({
                   <span className="text-[10px] text-slate-400 font-bold self-center mr-1">Presets:</span>
                   <button
                     type="button"
+                    onClick={() => setCustomQuery('from:txt.voice.google.com OR "Google Voice" OR Venmo OR "Cash App" OR Zelle OR PayPal OR Salsa OR payment OR paid')}
+                    className="text-[10px] font-bold px-2.5 py-1 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 rounded-lg border border-emerald-300 cursor-pointer transition-all"
+                  >
+                    Google Voice SMS & Payments
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => setCustomQuery('Venmo OR "Cash App" OR Zelle OR PayPal OR Salsa OR payment OR paid OR received OR "$"' )}
                     className="text-[10px] font-bold px-2.5 py-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg border border-indigo-200 cursor-pointer transition-all"
                   >
@@ -308,19 +315,12 @@ export const GmailSyncModal: React.FC<GmailSyncModalProps> = ({
                   >
                     Venmo & Cash App
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setCustomQuery('subject:(payment OR paid OR venmo OR cash OR salsa)')}
-                    className="text-[10px] font-bold px-2.5 py-1 bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-lg cursor-pointer transition-all"
-                  >
-                    Subject Contains Payment
-                  </button>
                 </div>
 
                 <p className="text-[11px] text-slate-500">
                   {language === 'es' 
-                    ? 'Especifique términos de búsqueda en su correo (sin restricciones de fecha).' 
-                    : 'Search terms used to locate Venmo, Cash App, and Salsa Richmond emails.'}
+                    ? 'Especifique términos de búsqueda en su correo (incluye SMS de Google Voice y notificaciones de pago).' 
+                    : 'Search terms used to locate Google Voice SMS, Venmo, Cash App, and Salsa Richmond emails.'}
                 </p>
               </div>
 
