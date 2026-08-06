@@ -186,14 +186,14 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
             disabled={isParsing || !parseEmailText.trim()}
             className="px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 cursor-pointer disabled:opacity-50"
           >
-            {isParsing ? 'Parsing...' : 'Simulate Regex Parse'}
+            {isParsing ? (language === 'es' ? 'Analizando...' : 'Parsing...') : (language === 'es' ? 'Simular Análisis Regex' : 'Simulate Regex Parse')}
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
-              Matched Performer
+              {language === 'es' ? 'Integrante / Bailarín Vinculado' : 'Matched Performer'}
             </label>
             <select
               value={email}
@@ -205,14 +205,14 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                   {p.name} ({p.email})
                 </option>
               ))}
-              <option value="unknown.payer@gmail.com">-- Unknown / Unresolved Payer --</option>
+              <option value="unknown.payer@gmail.com">{language === 'es' ? '-- Pagador Desconocido / No Resuelto --' : '-- Unknown / Unresolved Payer --'}</option>
             </select>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
-                Payer Name
+                {language === 'es' ? 'Nombre del Pagador' : 'Payer Name'}
               </label>
               <input
                 type="text"
@@ -225,7 +225,7 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
 
             <div>
               <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
-                Amount ($)
+                {language === 'es' ? 'Monto ($)' : 'Amount ($)'}
               </label>
               <input
                 type="number"
@@ -242,7 +242,7 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
-                Payment Channel Method
+                {language === 'es' ? 'Método / Canal de Pago' : 'Payment Channel Method'}
               </label>
               <select
                 value={method}
@@ -252,32 +252,32 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                 <option value="Venmo">🟣 Venmo</option>
                 <option value="Zelle">💚 Zelle</option>
                 <option value="Cash App">🟢 Cash App</option>
-                <option value="Direct / Salsa Richmond">🔵 Direct / Salsa Richmond</option>
-                <option value="Manual / Cash">💵 Manual / Cash</option>
-                <option value="Debt Collection">⚖️ Debt Collection</option>
+                <option value="Direct / Salsa Richmond">{language === 'es' ? '🔵 Directo / Salsa Richmond' : '🔵 Direct / Salsa Richmond'}</option>
+                <option value="Manual / Cash">{language === 'es' ? '💵 Manual / Efectivo' : '💵 Manual / Cash'}</option>
+                <option value="Debt Collection">{language === 'es' ? '⚖️ Agencia de Cobros' : '⚖️ Debt Collection'}</option>
               </select>
             </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
-                Fee Allocation Target
+                {language === 'es' ? 'Destino de Asignación de Cuota' : 'Fee Allocation Target'}
               </label>
               <select
                 value={targetFeeType}
                 onChange={e => setTargetFeeType(e.target.value as FeeAllocationTarget)}
                 className="w-full p-2.5 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl text-purple-900"
               >
-                <option value="All">🔵 All (Base Dues + Late Fees)</option>
-                <option value="Late Fees">🟡 Late Fees Only</option>
-                <option value="Monthly Dues">🟢 Monthly Base Dues Only</option>
-                <option value="Debt Collection Fee">🟣 Debt Collection Agency Fee</option>
+                <option value="All">{language === 'es' ? '🔵 Todos (Cuota Base + Recargos por Mora)' : '🔵 All (Base Dues + Late Fees)'}</option>
+                <option value="Late Fees">{language === 'es' ? '🟡 Solo Recargos por Mora' : '🟡 Late Fees Only'}</option>
+                <option value="Monthly Dues">{language === 'es' ? '🟢 Solo Cuota Base Mensual' : '🟢 Monthly Base Dues Only'}</option>
+                <option value="Debt Collection Fee">{language === 'es' ? '🟣 Tarifa de Agencia de Cobros' : '🟣 Debt Collection Agency Fee'}</option>
               </select>
             </div>
           </div>
 
           <div>
             <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
-              Subject Line
+              {language === 'es' ? 'Línea de Asunto' : 'Subject Line'}
             </label>
             <input
               type="text"
@@ -289,11 +289,11 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
 
           <div>
             <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
-              Internal Ledger Notes
+              {language === 'es' ? 'Notas Internas del Libro Mayor' : 'Internal Ledger Notes'}
             </label>
             <input
               type="text"
-              placeholder="e.g. Paid for April & May Dues"
+              placeholder={language === 'es' ? 'ej. Pagado para Cuotas de Abril y Mayo' : 'e.g. Paid for April & May Dues'}
               value={notes}
               onChange={e => setNotes(e.target.value)}
               className="w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl"
@@ -306,13 +306,13 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
               onClick={onClose}
               className="px-4 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl"
             >
-              Cancel
+              {language === 'es' ? 'Cancelar' : 'Cancel'}
             </button>
             <button
               type="submit"
               className="px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm"
             >
-              Save Transaction & Calculate Balances
+              {language === 'es' ? 'Guardar Transacción y Recalcular' : 'Save Transaction & Calculate Balances'}
             </button>
           </div>
         </form>
