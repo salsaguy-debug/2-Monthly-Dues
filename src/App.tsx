@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Mail, CloudDownload, Trash2, CheckCircle, Database } from 'lucide-react';
+import { Mail, CloudDownload, Trash2, CheckCircle, Database, RotateCcw } from 'lucide-react';
 import { SystemSettings, PaymentRecord, MatchStatus, RawPerformer, WidgetType } from './types';
 import { DEFAULT_SETTINGS, INITIAL_PAYMENTS, MASTER_ROSTER } from './data/defaultData';
 import { calculateAccountingState } from './utils/accountingEngine';
@@ -338,6 +338,13 @@ export default function App() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                onClick={handleResetDefaults}
+                className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer"
+              >
+                <RotateCcw className="w-4 h-4 text-slate-950" />
+                <span>Load Sample Demo Data</span>
+              </button>
               <button
                 onClick={() => setIsGmailSyncOpen(true)}
                 className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer"
