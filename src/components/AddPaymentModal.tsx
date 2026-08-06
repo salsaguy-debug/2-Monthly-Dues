@@ -152,25 +152,25 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl p-6 max-w-lg w-full border border-slate-200 shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-lg w-full border border-slate-200 dark:border-slate-800 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
           <div>
-            <span className="text-[10px] font-mono font-bold text-indigo-600 uppercase tracking-widest">
+            <span className="text-[10px] font-mono font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">
               {language === 'es' ? 'TRANSACCIONES DE INGRESO' : 'INTAKE ENGINE TRANSACTIONS'}
             </span>
-            <h3 className="text-base font-extrabold text-slate-800">
+            <h3 className="text-base font-extrabold text-slate-800 dark:text-white">
               {t('addPaymentTitle')}
             </h3>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-700 cursor-pointer">
+          <button onClick={onClose} className="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Regex Simulator Box */}
-        <div className="p-4 bg-indigo-50/60 rounded-2xl border border-indigo-100 mb-5 space-y-2">
-          <label className="block text-xs font-bold text-indigo-900 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+        <div className="p-4 bg-indigo-50/60 dark:bg-indigo-950/40 rounded-2xl border border-indigo-100 dark:border-indigo-800 mb-5 space-y-2">
+          <label className="block text-xs font-bold text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
             {language === 'es' ? 'Analizador Automático de Correo Gmail (Simulador Regex)' : 'Quick Gmail Intake Auto-Parser (Regex Simulation)'}
           </label>
           <input
@@ -178,13 +178,13 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
             placeholder={language === 'es' ? 'Pegar asunto ej: "Recibiste $30.00 de Mateo Silva"' : 'Paste header e.g. "You received $30.00 from Mateo Silva"'}
             value={parseEmailText}
             onChange={e => setParseEmailText(e.target.value)}
-            className="w-full p-2 text-xs font-mono bg-white border border-indigo-200 rounded-xl"
+            className="w-full p-2 text-xs font-mono bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-700 text-slate-900 dark:text-white rounded-xl"
           />
           <button
             type="button"
             onClick={handleSimulateRegexParse}
             disabled={isParsing || !parseEmailText.trim()}
-            className="px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 cursor-pointer disabled:opacity-50"
+            className="px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg cursor-pointer disabled:opacity-50"
           >
             {isParsing ? (language === 'es' ? 'Analizando...' : 'Parsing...') : (language === 'es' ? 'Simular Análisis Regex' : 'Simulate Regex Parse')}
           </button>
@@ -192,13 +192,13 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
+            <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
               {language === 'es' ? 'Integrante / Bailarín Vinculado' : 'Matched Performer'}
             </label>
             <select
               value={email}
               onChange={e => handlePerformerSelect(e.target.value)}
-              className="w-full p-2.5 text-xs font-mono font-semibold bg-slate-50 border border-slate-200 rounded-xl"
+              className="w-full p-2.5 text-xs font-mono font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl"
             >
               {activePerformers.map((p, idx) => (
                 <option key={`add-pay-perf-${p.email}-${idx}`} value={p.email}>
@@ -211,7 +211,7 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                 {language === 'es' ? 'Nombre del Pagador' : 'Payer Name'}
               </label>
               <input
@@ -219,12 +219,12 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                 required
                 value={payerName}
                 onChange={e => setPayerName(e.target.value)}
-                className="w-full p-2.5 text-xs font-medium bg-slate-50 border border-slate-200 rounded-xl"
+                className="w-full p-2.5 text-xs font-medium bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                 {language === 'es' ? 'Monto ($)' : 'Amount ($)'}
               </label>
               <input
@@ -234,20 +234,20 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
                 required
                 value={amount}
                 onChange={e => setAmount(parseFloat(e.target.value) || 0)}
-                className="w-full p-2.5 text-xs font-mono font-bold bg-slate-50 border border-slate-200 rounded-xl"
+                className="w-full p-2.5 text-xs font-mono font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                 {language === 'es' ? 'Método / Canal de Pago' : 'Payment Channel Method'}
               </label>
               <select
                 value={method}
                 onChange={e => setMethod(e.target.value as PaymentMethod)}
-                className="w-full p-2.5 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl"
+                className="w-full p-2.5 text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl"
               >
                 <option value="Venmo">🟣 Venmo</option>
                 <option value="Zelle">💚 Zelle</option>
@@ -259,13 +259,13 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
                 {language === 'es' ? 'Destino de Asignación de Cuota' : 'Fee Allocation Target'}
               </label>
               <select
                 value={targetFeeType}
                 onChange={e => setTargetFeeType(e.target.value as FeeAllocationTarget)}
-                className="w-full p-2.5 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl text-purple-900"
+                className="w-full p-2.5 text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl text-purple-900 dark:text-purple-300"
               >
                 <option value="All">{language === 'es' ? '🔵 Todos (Cuota Base + Recargos por Mora)' : '🔵 All (Base Dues + Late Fees)'}</option>
                 <option value="Late Fees">{language === 'es' ? '🟡 Solo Recargos por Mora' : '🟡 Late Fees Only'}</option>
@@ -276,19 +276,19 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
+            <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
               {language === 'es' ? 'Línea de Asunto' : 'Subject Line'}
             </label>
             <input
               type="text"
               value={subject}
               onChange={e => setSubject(e.target.value)}
-              className="w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl"
+              className="w-full p-2.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
+            <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">
               {language === 'es' ? 'Notas Internas del Libro Mayor' : 'Internal Ledger Notes'}
             </label>
             <input
@@ -296,21 +296,21 @@ export const AddPaymentModal: React.FC<AddPaymentModalProps> = ({
               placeholder={language === 'es' ? 'ej. Pagado para Cuotas de Abril y Mayo' : 'e.g. Paid for April & May Dues'}
               value={notes}
               onChange={e => setNotes(e.target.value)}
-              className="w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl"
+              className="w-full p-2.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl"
             />
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl"
+              className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-all cursor-pointer"
             >
               {language === 'es' ? 'Cancelar' : 'Cancel'}
             </button>
             <button
               type="submit"
-              className="px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm"
+              className="px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm cursor-pointer transition-all"
             >
               {language === 'es' ? 'Guardar Transacción y Recalcular' : 'Save Transaction & Calculate Balances'}
             </button>
