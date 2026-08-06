@@ -43,7 +43,7 @@ An executive-grade financial management platform, performer monthly dues tracker
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/monthly-dues.git
+   git clone https://github.com/salsaguy-debug/monthly-dues.git
    cd monthly-dues
    ```
 
