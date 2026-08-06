@@ -97,9 +97,11 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         {/* Logo & Title */}
         <div className="flex items-center space-x-3.5 shrink-0">
-          <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-xs shrink-0">
-            T
-          </div>
+          <img 
+            src="./logo.jpg" 
+            alt="Logo" 
+            className="w-11 h-11 rounded-full object-cover shadow-md border-2 border-indigo-500 shrink-0" 
+          />
           <div>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">
               {language === 'es' ? 'Cuotas Mensuales' : 'Monthly Dues'}
