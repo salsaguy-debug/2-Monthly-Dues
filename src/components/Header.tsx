@@ -92,9 +92,9 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   return (
-    <header className="sticky top-2 sm:top-4 z-40 mb-6 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-md transition-all text-slate-800 dark:text-slate-100">
+    <header className="sticky top-0 z-40 w-full mb-6 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-4 sm:px-6 lg:px-8 py-3.5 border-b border-slate-200/80 dark:border-slate-800 shadow-sm transition-all text-slate-800 dark:text-slate-100">
       {/* Top Row: Logo/Title & System Action Badges */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+      <div className="max-w-[1600px] mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         {/* Logo & Title */}
         <div className="flex items-center space-x-3.5 shrink-0">
           <img 

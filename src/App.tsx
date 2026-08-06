@@ -301,27 +301,28 @@ export default function App() {
   const activePerformersEmails = activePerformersList.map(p => p.email);
 
   return (
-    <div className="bg-[#F1F3F5] dark:bg-slate-950 min-h-screen text-slate-900 dark:text-slate-100 font-sans p-4 sm:p-6 lg:p-8 flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
-      <div className="max-w-7xl mx-auto w-full flex-grow">
-        {/* Top Header */}
-        <Header
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          executionTimeMs={accountingState.executionTimeMs}
-          onOpenAddPayment={() => setIsAddPaymentOpen(true)}
-          onTriggerDailySync={handleTriggerDailySync}
-          isSyncing={isSyncing}
-          onOpenWeeklyEmailPreview={() => setIsWeeklyEmailModalOpen(true)}
-          onOpenDataManagement={() => setIsDataManagementOpen(true)}
-          onOpenGmailSync={() => setIsGmailSyncOpen(true)}
-          onOpenLoadRealData={() => setIsLoadRealDataOpen(true)}
-          onClearAllData={handleClearAllData}
-          onResetBaselineData={handleResetDefaults}
-          onOpenDebtCollection={() => setIsDebtCollectionOpen(true)}
-          onOpenUserGuide={() => setIsUserGuideOpen(true)}
-          onOpenExcludedPerformers={() => setIsExcludedPerformersOpen(true)}
-          onOpenWidgetModal={(widget) => setWidgetModalType(widget)}
-        />
+    <div className="bg-[#F1F3F5] dark:bg-slate-950 min-h-screen text-slate-900 dark:text-slate-100 font-sans flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+      {/* Top Header Full Side-to-Side */}
+      <Header
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        executionTimeMs={accountingState.executionTimeMs}
+        onOpenAddPayment={() => setIsAddPaymentOpen(true)}
+        onTriggerDailySync={handleTriggerDailySync}
+        isSyncing={isSyncing}
+        onOpenWeeklyEmailPreview={() => setIsWeeklyEmailModalOpen(true)}
+        onOpenDataManagement={() => setIsDataManagementOpen(true)}
+        onOpenGmailSync={() => setIsGmailSyncOpen(true)}
+        onOpenLoadRealData={() => setIsLoadRealDataOpen(true)}
+        onClearAllData={handleClearAllData}
+        onResetBaselineData={handleResetDefaults}
+        onOpenDebtCollection={() => setIsDebtCollectionOpen(true)}
+        onOpenUserGuide={() => setIsUserGuideOpen(true)}
+        onOpenExcludedPerformers={() => setIsExcludedPerformersOpen(true)}
+        onOpenWidgetModal={(widget) => setWidgetModalType(widget)}
+      />
+
+      <div className="max-w-[1600px] mx-auto w-full px-4 sm:px-6 lg:px-8 flex-grow">
 
         {/* Live Workspace Empty State / Quick Sync Banner */}
         {roster.length === 0 && payments.length === 0 && (
