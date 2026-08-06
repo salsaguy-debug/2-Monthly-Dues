@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
-import { WidgetType } from '../types';
+import logoImg from '../assets/logo.jpg';
 
 
 interface HeaderProps {
@@ -98,7 +98,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Logo & Title */}
         <div className="flex items-center space-x-3.5 shrink-0">
           <img 
-            src="./logo.jpg" 
+            src={logoImg} 
             alt="Logo" 
             className="w-11 h-11 rounded-full object-cover shadow-md border-2 border-indigo-500 shrink-0" 
           />
