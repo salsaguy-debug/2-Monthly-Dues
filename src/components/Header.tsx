@@ -29,7 +29,8 @@ import {
   PieChart,
   Cpu,
   BarChart3,
-  RotateCcw
+  RotateCcw,
+  Calculator
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
@@ -53,6 +54,7 @@ interface HeaderProps {
   onOpenUserGuide?: () => void;
   onOpenExcludedPerformers?: () => void;
   onOpenWidgetModal?: (widget: WidgetType) => void;
+  onOpenCalculator?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -71,7 +73,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenDebtCollection,
   onOpenUserGuide,
   onOpenExcludedPerformers,
-  onOpenWidgetModal
+  onOpenWidgetModal,
+  onOpenCalculator
 }) => {
   const { language, setLanguage, t } = useLanguage();
   const { theme, toggleTheme, isDark } = useTheme();
@@ -130,10 +133,10 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* System Optimal Badge */}
           <div className="h-9 px-3.5 flex items-center bg-[#f0fdf4] dark:bg-emerald-950/40 rounded-xl border border-emerald-300/80 dark:border-emerald-800 shrink-0 whitespace-nowrap">
-            <span className="w-2 h-2 bg-emerald-500 rounded-full mr-2 shrink-0"></span>
+            <span className="w-2 h-2 bg-emerald-500 rounded-full mr-2 shrink-0 animate-pulse"></span>
             <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mr-1.5" />
             <span className="text-xs font-extrabold text-emerald-700 dark:text-emerald-300 uppercase tracking-wide whitespace-nowrap">
-              SYSTEM OPTIMAL
+              SHARED STORAGE • 3 USERS REAL-TIME SYNC
             </span>
           </div>
 
@@ -147,6 +150,18 @@ export const Header: React.FC<HeaderProps> = ({
             <Zap className={`w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0 ${isSyncing ? 'animate-spin' : ''}`} />
             <span className="whitespace-nowrap">{isSyncing ? t('btnSyncing') : 'Daily Sync'}</span>
           </button>
+
+          {/* Calculator Popup Widget Button */}
+          {onOpenCalculator && (
+            <button
+              onClick={onOpenCalculator}
+              className="h-9 px-3.5 text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 rounded-xl transition-all border border-indigo-200 dark:border-indigo-800 flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap shadow-2xs"
+              title="Open financial dues calculator"
+            >
+              <Calculator className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+              <span>{language === 'es' ? 'Calculadora' : 'Calculator'}</span>
+            </button>
+          )}
 
           {/* Segmented Language Toggle (us EN / MX ES) */}
           <div className="h-9 flex items-center bg-[#edeef4] dark:bg-slate-800 p-1 rounded-xl border border-slate-200/80 dark:border-slate-700 shrink-0">
@@ -409,7 +424,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <LayoutGrid className="w-4 h-4" />
-            <span>Dashboard</span>
+            <span>{t('tabDashboard')}</span>
           </button>
 
           <button
@@ -421,7 +436,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <Table className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-            <span>Master Ledger</span>
+            <span>{t('tabLedger')}</span>
           </button>
 
           <button
@@ -433,7 +448,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <Receipt className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-            <span>Payment Records</span>
+            <span>{t('tabPayments')}</span>
           </button>
 
           <button
@@ -445,7 +460,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <Users className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-            <span>By Performer</span>
+            <span>{t('tabPerformers')}</span>
           </button>
 
           <button
@@ -457,7 +472,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <Settings className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-            <span>Settings</span>
+            <span>{t('tabSettings')}</span>
           </button>
         </nav>
       </div>

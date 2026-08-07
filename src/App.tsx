@@ -3,7 +3,7 @@ import { Mail, CloudDownload, Trash2, CheckCircle, Database, RotateCcw } from 'l
 import { SystemSettings, PaymentRecord, MatchStatus, RawPerformer, WidgetType } from './types';
 import { DEFAULT_SETTINGS, INITIAL_PAYMENTS, MASTER_ROSTER } from './data/defaultData';
 import { calculateAccountingState } from './utils/accountingEngine';
-import { fetchRealDataFromAppsScript, getSavedAppsScriptUrl } from './services/appsScriptService';
+import { fetchRealDataFromAppsScript, getSavedAppsScriptUrl, pushRealDataToAppsScript } from './services/appsScriptService';
 import { Header } from './components/Header';
 import { BentoDashboard } from './components/BentoDashboard';
 import { LedgerView } from './components/LedgerView';
@@ -21,7 +21,8 @@ import { DebtCollectionModal } from './components/DebtCollectionModal';
 import { PerformerDetailView } from './components/PerformerDetailView';
 import { UserGuideModal } from './components/UserGuideModal';
 import { ExcludedPerformersModal } from './components/ExcludedPerformersModal';
-import { WidgetModal } from './components/WidgetModal';
+import { CalculatorModal } from './components/CalculatorModal';
+import { Calculator } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'ledger' | 'payments' | 'performers' | 'settings' | 'diagnostics'>('dashboard');
@@ -74,6 +75,7 @@ export default function App() {
   const [isDebtCollectionOpen, setIsDebtCollectionOpen] = useState(false);
   const [isUserGuideOpen, setIsUserGuideOpen] = useState(false);
   const [isExcludedPerformersOpen, setIsExcludedPerformersOpen] = useState(false);
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [widgetModalType, setWidgetModalType] = useState<WidgetType | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -130,11 +132,27 @@ export default function App() {
     return Array.from(map.values());
   };
 
-  // Auto-sync from Google Sheets on startup if Google Apps Script URL is saved
+  // Auto-sync from Google Sheets on startup and periodic live polling (every 30s) for 3+ concurrent users
   useEffect(() => {
+    const performLiveSync = () => {
+      const savedUrl = getSavedAppsScriptUrl();
+      if (savedUrl) {
+        fetchRealDataFromAppsScript(savedUrl)
+          .then(result => {
+            if (result.success && (result.roster.length > 0 || result.payments.length > 0)) {
+              setRoster(prev => mergeRosterData(prev, result.roster));
+              setPayments(prev => mergePaymentsData(prev, result.payments));
+              localStorage.removeItem('tradicion_cleared');
+            }
+          })
+          .catch(err => console.error('Live shared sync poll error:', err));
+      }
+    };
+
+    // Initial mount sync
+    setIsSyncing(true);
     const savedUrl = getSavedAppsScriptUrl();
     if (savedUrl) {
-      setIsSyncing(true);
       fetchRealDataFromAppsScript(savedUrl)
         .then(result => {
           if (result.success && (result.roster.length > 0 || result.payments.length > 0)) {
@@ -143,9 +161,14 @@ export default function App() {
             localStorage.removeItem('tradicion_cleared');
           }
         })
-        .catch(err => console.error('Auto-load from Google Sheets failed on mount:', err))
         .finally(() => setIsSyncing(false));
+    } else {
+      setIsSyncing(false);
     }
+
+    // Set up 30-second live background polling interval so all 3 users see live edits without data loss
+    const pollInterval = setInterval(performLiveSync, 30000);
+    return () => clearInterval(pollInterval);
   }, []);
 
   const [syncVersion, setSyncVersion] = useState(0);
@@ -157,6 +180,10 @@ export default function App() {
 
   const handleSaveSettings = (newSettings: SystemSettings) => {
     setSettings(newSettings);
+    const savedUrl = getSavedAppsScriptUrl();
+    if (savedUrl) {
+      pushRealDataToAppsScript(savedUrl, 'syncAll', { settings: newSettings });
+    }
   };
 
   const handleResetDefaults = () => {
@@ -202,6 +229,12 @@ export default function App() {
   const handleAddPayment = (newPayment: PaymentRecord) => {
     localStorage.removeItem('tradicion_cleared');
     setPayments(prev => [newPayment, ...prev]);
+
+    // Push to shared real-time storage for 3 users
+    const savedUrl = getSavedAppsScriptUrl();
+    if (savedUrl) {
+      pushRealDataToAppsScript(savedUrl, 'addPayment', { payment: newPayment });
+    }
   };
 
   // Automated Callback mechanism triggering instant re-fetch/re-calculation of accountingState
@@ -229,12 +262,17 @@ export default function App() {
           const updatedName = (matchedName && (p.payerName === 'Unmatched Payer' || !p.payerName))
             ? matchedName
             : p.payerName;
-          return {
+          const updatedPayment = {
             ...p,
             matchStatus: newStatus,
             email: updatedEmail,
             payerName: updatedName
           };
+          const savedUrl = getSavedAppsScriptUrl();
+          if (savedUrl) {
+            pushRealDataToAppsScript(savedUrl, 'updatePayment', { payment: updatedPayment });
+          }
+          return updatedPayment;
         }
         return p;
       })
@@ -252,6 +290,12 @@ export default function App() {
       }
     });
 
+    // Push performer update to shared storage
+    const savedUrl = getSavedAppsScriptUrl();
+    if (savedUrl) {
+      pushRealDataToAppsScript(savedUrl, 'savePerformer', { performer: updated, oldEmail });
+    }
+
     // If email changed, update existing payment records
     if (oldEmail.toLowerCase() !== updated.email.toLowerCase()) {
       setPayments(prev => prev.map(p => p.email.toLowerCase() === oldEmail.toLowerCase() ? { ...p, email: updated.email.toLowerCase() } : p));
@@ -262,14 +306,26 @@ export default function App() {
     localStorage.removeItem('tradicion_cleared');
     const target = (email || '').toLowerCase().trim();
     setRoster(prev => prev.filter(p => (p.email || '').toLowerCase().trim() !== target));
+    const savedUrl = getSavedAppsScriptUrl();
+    if (savedUrl) {
+      pushRealDataToAppsScript(savedUrl, 'deletePerformer', { email: target });
+    }
   };
 
   const handleSavePayment = (updated: PaymentRecord) => {
     setPayments(prev => prev.map(p => p.id === updated.id ? updated : p));
+    const savedUrl = getSavedAppsScriptUrl();
+    if (savedUrl) {
+      pushRealDataToAppsScript(savedUrl, 'updatePayment', { payment: updated });
+    }
   };
 
   const handleDeletePayment = (id: string) => {
     setPayments(prev => prev.filter(p => p.id !== id));
+    const savedUrl = getSavedAppsScriptUrl();
+    if (savedUrl) {
+      pushRealDataToAppsScript(savedUrl, 'deletePayment', { id });
+    }
   };
 
   const handleTriggerDailySync = async () => {
@@ -320,6 +376,7 @@ export default function App() {
         onOpenUserGuide={() => setIsUserGuideOpen(true)}
         onOpenExcludedPerformers={() => setIsExcludedPerformersOpen(true)}
         onOpenWidgetModal={(widget) => setWidgetModalType(widget)}
+        onOpenCalculator={() => setIsCalculatorOpen(true)}
       />
 
       <div className="max-w-[1600px] mx-auto w-full px-4 sm:px-6 lg:px-8 flex-grow">
@@ -561,6 +618,23 @@ export default function App() {
         payments={payments}
         onSelectWidget={(widget) => setWidgetModalType(widget)}
       />
+
+      {/* Popup Calculator Widget Modal */}
+      <CalculatorModal
+        isOpen={isCalculatorOpen}
+        onClose={() => setIsCalculatorOpen(false)}
+        baseDues={settings.BASE_DUES}
+        lateFee={settings.LATE_FEE}
+      />
+
+      {/* Sticky Floating Calculator Widget Launcher Button */}
+      <button
+        onClick={() => setIsCalculatorOpen(true)}
+        className="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white shadow-xl hover:shadow-2xl border-2 border-indigo-400/40 flex items-center justify-center transition-all transform hover:scale-110 active:scale-95 cursor-pointer group"
+        title="Open Calculator Widget"
+      >
+        <Calculator className="w-6 h-6 text-white group-hover:rotate-12 transition-transform" />
+      </button>
     </div>
   );
 }

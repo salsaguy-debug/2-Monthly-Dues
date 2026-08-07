@@ -110,12 +110,20 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
     setNewPerformerPhone(p.phone || '');
   };
 
+  // Confirmation warning modal state flags
+  const [deletingPerformerEmail, setDeletingPerformerEmail] = useState<string | null>(null);
+  const [isConfirmingClearRoster, setIsConfirmingClearRoster] = useState(false);
+  const [isConfirmingClearPayments, setIsConfirmingClearPayments] = useState(false);
+  const [isConfirmingClearSample, setIsConfirmingClearSample] = useState(false);
+
   const handleDeletePerformer = (email: string) => {
     onUpdateRoster(roster.filter(p => p.email.toLowerCase().trim() !== email.toLowerCase().trim()));
+    setDeletingPerformerEmail(null);
   };
 
   const handleClearAllPayments = () => {
     onUpdatePayments([]);
+    setIsConfirmingClearPayments(false);
   };
 
   const handleParseCsv = () => {
@@ -314,11 +322,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
           <div className="flex items-center gap-2 ml-auto">
             {onClearAllData && (
               <button
-                onClick={() => {
-                  if (confirm(language === 'es' ? '¿Limpiar TODOS los datos de muestra para empezar desde cero?' : 'Clear ALL sample roster and payment data to start fresh with real data?')) {
-                    onClearAllData();
-                  }
-                }}
+                onClick={() => setIsConfirmingClearSample(true)}
                 className="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
                 title="Wipe out all sample data"
               >
@@ -425,11 +429,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
                   </span>
                   {roster.length > 0 && (
                     <button
-                      onClick={() => {
-                        if (confirm(language === 'es' ? '¿Limpiar todo el elenco registrado?' : 'Clear entire performer roster to add your real dancers?')) {
-                          onUpdateRoster([]);
-                        }
-                      }}
+                      onClick={() => setIsConfirmingClearRoster(true)}
                       className="text-[11px] font-bold text-rose-600 hover:text-rose-800 hover:bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200 transition-all cursor-pointer flex items-center gap-1"
                     >
                       <Trash2 className="w-3 h-3" />
@@ -456,7 +456,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
-                          onClick={() => handleDeletePerformer(p.email)}
+                          onClick={() => setDeletingPerformerEmail(p.email)}
                           className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all cursor-pointer"
                           title="Delete"
                         >
@@ -484,7 +484,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
                   </p>
                 </div>
                 <button
-                  onClick={handleClearAllPayments}
+                  onClick={() => setIsConfirmingClearPayments(true)}
                   className="px-3 py-1.5 bg-rose-600 text-white font-bold text-xs rounded-xl hover:bg-rose-700 transition-all shrink-0 cursor-pointer flex items-center gap-1.5"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -674,6 +674,184 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
           )}
         </div>
       </div>
+
+      {/* Delete Single Performer Warning Confirmation Modal */}
+      {deletingPerformerEmail && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full border border-rose-200 shadow-2xl relative space-y-4 text-left">
+            <div className="flex items-center gap-3 text-rose-600">
+              <div className="w-10 h-10 bg-rose-100 rounded-2xl flex items-center justify-center shrink-0 border border-rose-200">
+                <Trash2 className="w-5 h-5 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-900">
+                  {language === 'es' ? '⚠️ Confirmar Eliminación' : '⚠️ Confirm Deletion'}
+                </h3>
+                <p className="text-xs text-rose-600 font-bold">
+                  {language === 'es' ? 'Eliminar integrante del elenco' : 'Remove performer from roster'}
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-700 bg-rose-50 p-3 rounded-xl border border-rose-200 font-semibold">
+              {language === 'es'
+                ? `¿Está seguro de que desea eliminar a ${deletingPerformerEmail}?`
+                : `Are you sure you want to remove ${deletingPerformerEmail} from the roster?`}
+            </p>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                onClick={() => setDeletingPerformerEmail(null)}
+                className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 rounded-xl hover:bg-slate-200 cursor-pointer"
+              >
+                {language === 'es' ? 'Cancelar' : 'Cancel'}
+              </button>
+              <button
+                onClick={() => handleDeletePerformer(deletingPerformerEmail)}
+                className="px-4 py-2 text-xs font-black text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-md cursor-pointer flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{language === 'es' ? 'Sí, Eliminar' : 'Yes, Delete'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Clear Entire Roster Warning Confirmation Modal */}
+      {isConfirmingClearRoster && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full border border-rose-200 shadow-2xl relative space-y-4 text-left">
+            <div className="flex items-center gap-3 text-rose-600">
+              <div className="w-10 h-10 bg-rose-100 rounded-2xl flex items-center justify-center shrink-0 border border-rose-200">
+                <Trash2 className="w-5 h-5 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-900">
+                  {language === 'es' ? '⚠️ Confirmar Limpieza de Elenco' : '⚠️ Confirm Roster Clear'}
+                </h3>
+                <p className="text-xs text-rose-600 font-bold">
+                  {language === 'es' ? 'Acción de eliminación masiva' : 'Mass deletion action'}
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-700 bg-rose-50 p-3 rounded-xl border border-rose-200 font-semibold">
+              {language === 'es'
+                ? `¿Está seguro de que desea eliminar TODO el elenco de integrantes (${roster.length} integrantes)?`
+                : `Are you sure you want to clear the entire performer roster (${roster.length} active performers)?`}
+            </p>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                onClick={() => setIsConfirmingClearRoster(false)}
+                className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 rounded-xl hover:bg-slate-200 cursor-pointer"
+              >
+                {language === 'es' ? 'Cancelar' : 'Cancel'}
+              </button>
+              <button
+                onClick={() => {
+                  onUpdateRoster([]);
+                  setIsConfirmingClearRoster(false);
+                }}
+                className="px-4 py-2 text-xs font-black text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-md cursor-pointer flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{language === 'es' ? 'Sí, Limpiar Elenco' : 'Yes, Clear Roster'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Clear All Payments Warning Confirmation Modal */}
+      {isConfirmingClearPayments && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full border border-rose-200 shadow-2xl relative space-y-4 text-left">
+            <div className="flex items-center gap-3 text-rose-600">
+              <div className="w-10 h-10 bg-rose-100 rounded-2xl flex items-center justify-center shrink-0 border border-rose-200">
+                <Trash2 className="w-5 h-5 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-900">
+                  {language === 'es' ? '⚠️ Confirmar Limpieza de Pagos' : '⚠️ Confirm Payments Purge'}
+                </h3>
+                <p className="text-xs text-rose-600 font-bold">
+                  {language === 'es' ? 'Eliminar historial de transacciones' : 'Purge transaction history'}
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-700 bg-rose-50 p-3 rounded-xl border border-rose-200 font-semibold">
+              {language === 'es'
+                ? `¿Está seguro de que desea eliminar TODOS los registros de pagos (${payments.length} transacciones)?`
+                : `Are you sure you want to clear all payment records (${payments.length} recorded transactions)?`}
+            </p>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                onClick={() => setIsConfirmingClearPayments(false)}
+                className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 rounded-xl hover:bg-slate-200 cursor-pointer"
+              >
+                {language === 'es' ? 'Cancelar' : 'Cancel'}
+              </button>
+              <button
+                onClick={handleClearAllPayments}
+                className="px-4 py-2 text-xs font-black text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-md cursor-pointer flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{language === 'es' ? 'Sí, Limpiar Pagos' : 'Yes, Clear Payments'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Clear Sample Data Start Fresh Warning Confirmation Modal */}
+      {isConfirmingClearSample && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full border border-rose-200 shadow-2xl relative space-y-4 text-left">
+            <div className="flex items-center gap-3 text-rose-600">
+              <div className="w-10 h-10 bg-rose-100 rounded-2xl flex items-center justify-center shrink-0 border border-rose-200">
+                <Trash2 className="w-5 h-5 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-900">
+                  {language === 'es' ? '⚠️ Confirmar Limpieza de Datos de Muestra' : '⚠️ Confirm Purge Sample Data'}
+                </h3>
+                <p className="text-xs text-rose-600 font-bold">
+                  {language === 'es' ? 'Eliminar todos los datos para empezar de cero' : 'Purge all sample data to start fresh'}
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-700 bg-rose-50 p-3 rounded-xl border border-rose-200 font-semibold">
+              {language === 'es'
+                ? '¿Está seguro de que desea eliminar TODOS los datos de muestra (elenco y pagos) para empezar con su información real?'
+                : 'Are you sure you want to clear ALL sample roster and payment data to start fresh with your real system data?'}
+            </p>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                onClick={() => setIsConfirmingClearSample(false)}
+                className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 rounded-xl hover:bg-slate-200 cursor-pointer"
+              >
+                {language === 'es' ? 'Cancelar' : 'Cancel'}
+              </button>
+              <button
+                onClick={() => {
+                  setIsConfirmingClearSample(false);
+                  if (onClearAllData) onClearAllData();
+                }}
+                className="px-4 py-2 text-xs font-black text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-md cursor-pointer flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{language === 'es' ? 'Sí, Limpiar Todo' : 'Yes, Start Fresh'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -25,6 +25,7 @@ export const ExcludedPerformersModal: React.FC<ExcludedPerformersModalProps> = (
   const [selectedRosterEmail, setSelectedRosterEmail] = useState<string>('');
   const [isRawMode, setIsRawMode] = useState<boolean>(false);
   const [savedSuccess, setSavedSuccess] = useState<boolean>(false);
+  const [confirmRemoveEmail, setConfirmRemoveEmail] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -34,6 +35,7 @@ export const ExcludedPerformersModal: React.FC<ExcludedPerformersModalProps> = (
       setSavedSuccess(false);
       setNewEmail('');
       setSelectedRosterEmail('');
+      setConfirmRemoveEmail(null);
     }
   }, [isOpen, settings]);
 
@@ -41,6 +43,7 @@ export const ExcludedPerformersModal: React.FC<ExcludedPerformersModalProps> = (
     const updated = excludedList.filter(e => e.toLowerCase().trim() !== emailToRemove.toLowerCase().trim());
     setExcludedList(updated);
     setRawText(updated.join(', '));
+    setConfirmRemoveEmail(null);
   };
 
   const handleAddEmail = (emailToAdd: string) => {
@@ -153,6 +156,32 @@ export const ExcludedPerformersModal: React.FC<ExcludedPerformersModalProps> = (
             {!isRawMode && (
               <div className="space-y-3">
                 {/* Current Excluded Pills */}
+                {confirmRemoveEmail && (
+                  <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl flex items-center justify-between gap-2 text-xs font-bold text-amber-900 dark:text-amber-200 animate-in fade-in duration-150">
+                    <span>
+                      {language === 'es'
+                        ? `¿Remover ${confirmRemoveEmail} de la lista de exclusión?`
+                        : `Remove ${confirmRemoveEmail} from excluded list?`}
+                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setConfirmRemoveEmail(null)}
+                        className="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs hover:bg-slate-100"
+                      >
+                        {language === 'es' ? 'Cancelar' : 'Cancel'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveEmail(confirmRemoveEmail)}
+                        className="px-2.5 py-1 bg-rose-600 text-white rounded-lg text-xs font-bold hover:bg-rose-700 shadow-xs"
+                      >
+                        {language === 'es' ? 'Sí, Remover' : 'Yes, Remove'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex flex-wrap gap-2 p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl min-h-[80px]">
                   {excludedList.length === 0 ? (
                     <span className="text-xs text-slate-400 italic">
@@ -167,7 +196,7 @@ export const ExcludedPerformersModal: React.FC<ExcludedPerformersModalProps> = (
                         <span>{email}</span>
                         <button
                           type="button"
-                          onClick={() => handleRemoveEmail(email)}
+                          onClick={() => setConfirmRemoveEmail(email)}
                           className="hover:bg-rose-200 dark:hover:bg-rose-900/80 rounded-md p-0.5 transition-colors cursor-pointer text-rose-600 dark:text-rose-400"
                           title="Remove email"
                         >

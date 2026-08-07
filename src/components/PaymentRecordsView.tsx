@@ -54,6 +54,7 @@ export const PaymentRecordsView: React.FC<PaymentRecordsViewProps> = ({
   const [statusFilter, setStatusFilter] = useState<'ALL' | MatchStatus>('ALL');
   const [relinkId, setRelinkId] = useState<string | null>(null);
   const [selectedEmail, setSelectedEmail] = useState<string>('');
+  const [deletingPayment, setDeletingPayment] = useState<PaymentRecord | null>(null);
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
@@ -501,9 +502,7 @@ export const PaymentRecordsView: React.FC<PaymentRecordsViewProps> = ({
 
                       {onDeletePayment && (
                         <button
-                          onClick={() => {
-                            onDeletePayment(p.id);
-                          }}
+                          onClick={() => setDeletingPayment(p)}
                           className="p-1.5 text-rose-600 dark:text-rose-300 hover:text-rose-900 dark:hover:text-white bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900/60 rounded-lg border border-rose-200 dark:border-rose-800 transition-all cursor-pointer"
                           title="Delete payment"
                         >
@@ -576,6 +575,68 @@ export const PaymentRecordsView: React.FC<PaymentRecordsViewProps> = ({
                   <span>{language === 'es' ? 'Vincular y Recalcular' : 'Link & Recalculate'}</span>
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Payment Warning Confirmation Modal */}
+      {deletingPayment && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-md w-full border border-rose-200 dark:border-rose-900/50 shadow-2xl relative space-y-4 text-left transition-colors">
+            <button
+              onClick={() => setDeletingPayment(null)}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl transition-all cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3 text-rose-600 dark:text-rose-400">
+              <div className="w-10 h-10 bg-rose-100 dark:bg-rose-950/60 rounded-2xl flex items-center justify-center shrink-0 border border-rose-200 dark:border-rose-800">
+                <Trash2 className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-900 dark:text-white">
+                  {language === 'es' ? '⚠️ Confirmar Eliminación de Pago' : '⚠️ Confirm Payment Deletion'}
+                </h3>
+                <p className="text-xs text-rose-600 dark:text-rose-400 font-bold">
+                  {language === 'es' ? 'Acción permanente e irreversible' : 'Permanent and irreversible action'}
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/60 rounded-2xl space-y-2 text-xs text-rose-900 dark:text-rose-200">
+              <p className="font-bold">
+                {language === 'es'
+                  ? `¿Está seguro de que desea eliminar el pago de $${deletingPayment.amount} (${deletingPayment.payerName || deletingPayment.email})?`
+                  : `Are you sure you want to delete the payment record of $${deletingPayment.amount} (${deletingPayment.payerName || deletingPayment.email})?`}
+              </p>
+              <p className="text-[11px] text-rose-700 dark:text-rose-300">
+                {language === 'es'
+                  ? 'Esta transacción se eliminará del libro mayor y se recalcularán los saldos pendientes.'
+                  : 'This transaction record will be permanently deleted from ledger balances and calculations.'}
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <button
+                onClick={() => setDeletingPayment(null)}
+                className="px-4 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer"
+              >
+                {language === 'es' ? 'Cancelar' : 'Cancel'}
+              </button>
+              <button
+                onClick={() => {
+                  if (onDeletePayment && deletingPayment) {
+                    onDeletePayment(deletingPayment.id);
+                  }
+                  setDeletingPayment(null);
+                }}
+                className="px-4 py-2.5 text-xs font-black text-white bg-rose-600 hover:bg-rose-700 active:bg-rose-800 rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{language === 'es' ? 'Sí, Eliminar Pago' : 'Yes, Delete Payment'}</span>
+              </button>
             </div>
           </div>
         </div>

@@ -172,46 +172,6 @@ export const BentoDashboard: React.FC<BentoDashboardProps> = ({
     <div className="space-y-6">
       {/* Prominent & Comprehensive "Performer Roster Dues Status" Section */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 transition-colors">
-        {/* Section Title & Quick Stats Summary Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
-          <div>
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800">
-                <UserCheck className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-base font-black text-slate-900 dark:text-white">
-                  {t('rosterStatusTitle')}
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  {language === 'es' 
-                    ? `Monitoreo en tiempo real de cuotas, saldos y pagos por integrante (${activePerformers.length} bailarines activos)`
-                    : `Real-time compliance, balances & dues tracking across active roster (${activePerformers.length} active performers)`}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Summary Badge Chips */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="px-3 py-1.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/80 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>{statusCounts.current} {language === 'es' ? 'Al Día' : 'Current'}</span>
-            </div>
-            <div className="px-3 py-1.5 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200/80 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-bold flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-500" />
-              <span>{statusCounts.overdue1to30} {language === 'es' ? '1-30 Días' : '1-30 Days'}</span>
-            </div>
-            <div className="px-3 py-1.5 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200/80 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-xs font-bold flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-rose-500" />
-              <span>{statusCounts.overdue30Plus} {language === 'es' ? '30+ Días' : '30+ Days'}</span>
-            </div>
-            <div className="px-3 py-1.5 rounded-2xl bg-slate-900 dark:bg-slate-800 text-white text-xs font-mono font-black flex items-center gap-1.5 shadow-sm border border-transparent dark:border-slate-700">
-              <span>{language === 'es' ? 'Deuda:' : 'Owed:'}</span>
-              <span className="text-rose-300">{formatCurrency(statusCounts.totalOwed)}</span>
-            </div>
-          </div>
-        </div>
 
         {/* Controls & Filter Bar */}
         <div className="p-3 rounded-2xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3 shadow-2xs">
