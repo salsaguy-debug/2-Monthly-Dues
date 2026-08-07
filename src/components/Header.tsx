@@ -35,6 +35,7 @@ import {
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import logoImg from '../assets/logo.jpg';
+import { WidgetType } from '../types';
 
 
 interface HeaderProps {

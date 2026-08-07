@@ -9,8 +9,17 @@
     <link rel="apple-touch-icon" href="./favicon.jpg" />
     <title>Tradición Financial System - Dues & Financial Ledger</title>
   </head>
-  <body>
-    <div id="root"></div>
+  <body style="margin: 0; background-color: #0f172a;">
+    <div id="root">
+      <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #0f172a; color: #818cf8; font-family: system-ui, -apple-system, sans-serif;">
+        <div style="width: 32px; height: 32px; border: 3px solid #312e81; border-top-color: #818cf8; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px;"></div>
+        <div style="font-weight: 700; font-size: 14px; tracking: 0.05em;">Tradición Financial System</div>
+        <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Loading Dues & Financial Ledger...</div>
+      </div>
+      <style>
+        @keyframes spin { to { transform: rotate(360deg); } }
+      </style>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

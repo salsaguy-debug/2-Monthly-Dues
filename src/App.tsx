@@ -22,6 +22,7 @@ import { PerformerDetailView } from './components/PerformerDetailView';
 import { UserGuideModal } from './components/UserGuideModal';
 import { ExcludedPerformersModal } from './components/ExcludedPerformersModal';
 import { CalculatorModal } from './components/CalculatorModal';
+import { WidgetModal } from './components/WidgetModal';
 import { Calculator } from 'lucide-react';
 
 export default function App() {
