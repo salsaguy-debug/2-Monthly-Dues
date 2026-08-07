@@ -627,15 +627,6 @@ export default function App() {
         baseDues={settings.BASE_DUES}
         lateFee={settings.LATE_FEE}
       />
-
-      {/* Sticky Floating Calculator Widget Launcher Button */}
-      <button
-        onClick={() => setIsCalculatorOpen(true)}
-        className="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white shadow-xl hover:shadow-2xl border-2 border-indigo-400/40 flex items-center justify-center transition-all transform hover:scale-110 active:scale-95 cursor-pointer group"
-        title="Open Calculator Widget"
-      >
-        <Calculator className="w-6 h-6 text-white group-hover:rotate-12 transition-transform" />
-      </button>
     </div>
   );
 }

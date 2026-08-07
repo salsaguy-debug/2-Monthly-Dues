@@ -152,18 +152,6 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="whitespace-nowrap">{isSyncing ? t('btnSyncing') : 'Daily Sync'}</span>
           </button>
 
-          {/* Calculator Popup Widget Button */}
-          {onOpenCalculator && (
-            <button
-              onClick={onOpenCalculator}
-              className="h-9 px-3.5 text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 rounded-xl transition-all border border-indigo-200 dark:border-indigo-800 flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap shadow-2xs"
-              title="Open financial dues calculator"
-            >
-              <Calculator className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
-              <span>{language === 'es' ? 'Calculadora' : 'Calculator'}</span>
-            </button>
-          )}
-
           {/* Segmented Language Toggle (us EN / MX ES) */}
           <div className="h-9 flex items-center bg-[#edeef4] dark:bg-slate-800 p-1 rounded-xl border border-slate-200/80 dark:border-slate-700 shrink-0">
             <button
@@ -387,6 +375,24 @@ export const Header: React.FC<HeaderProps> = ({
                     <div>
                       <span className="block font-black">{language === 'es' ? 'Guía Ilustrada del Usuario' : '📖 Illustrated User Guide'}</span>
                       <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-normal block">Index & step-by-step instructions</span>
+                    </div>
+                  </button>
+                )}
+
+                {onOpenCalculator && (
+                  <button
+                    onClick={() => {
+                      setIsDataDropdownOpen(false);
+                      onOpenCalculator();
+                    }}
+                    className="w-full text-left px-3.5 py-2 text-xs font-bold text-indigo-900 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 flex items-center gap-2.5 transition-all cursor-pointer border-t border-slate-100 dark:border-slate-800"
+                  >
+                    <div className="w-7 h-7 bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded-lg flex items-center justify-center shrink-0">
+                      <Calculator className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <span className="block font-black">{language === 'es' ? 'Calculadora de Cuotas SOP' : '🧮 Financial Dues Calculator'}</span>
+                      <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-normal block">{language === 'es' ? 'Cálculos rápidos y recargos' : 'Quick balance & late fee math'}</span>
                     </div>
                   </button>
                 )}
