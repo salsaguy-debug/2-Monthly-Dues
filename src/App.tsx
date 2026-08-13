@@ -46,7 +46,9 @@ export default function App() {
       }
       const saved = localStorage.getItem('tradicion_payments');
       if (saved) {
-        return JSON.parse(saved);
+        const parsed: PaymentRecord[] = JSON.parse(saved);
+        const cleaned = parsed.filter(p => !p.email.endsWith('@tradicion.org') || p.email === 'aronjimenez@tradicion.org');
+        if (cleaned.length > 0) return cleaned;
       }
       return INITIAL_PAYMENTS;
     } catch {
@@ -61,7 +63,9 @@ export default function App() {
       }
       const saved = localStorage.getItem('tradicion_roster');
       if (saved) {
-        return JSON.parse(saved);
+        const parsed: RawPerformer[] = JSON.parse(saved);
+        const cleaned = parsed.filter(p => !p.email.endsWith('@tradicion.org') || p.email === 'aronjimenez@tradicion.org');
+        if (cleaned.length > 0) return cleaned;
       }
       return MASTER_ROSTER;
     } catch {
