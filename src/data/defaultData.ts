@@ -23,7 +23,19 @@ export interface RawPerformer {
 }
 
 export const MASTER_ROSTER: RawPerformer[] = [
-  // Active Performers (22 dancers/performers)
+  // Active Performers & Real Roster Accounts
+  { email: 'meybollmg@gmail.com', name: 'Meyboll Menard', phone: '(804) 555-0301' },
+  { email: 'paolamgonzalez21@gmail.com', name: 'Paola Gonzalez', phone: '(804) 555-0302' },
+  { email: 'luismariofebres@gmail.com', name: 'Luis Febres', phone: '(804) 555-0303' },
+  { email: 'dhsampso@gmail.com', name: 'Douglas Sampson', phone: '(804) 555-0304' },
+  { email: 'darienl140@gmail.com', name: 'Darien L Rodriguez Rios', phone: '(804) 555-0305' },
+  { email: 'ednatradicion@gmail.com', name: 'Edna Mayen', phone: '(804) 555-0306' },
+  { email: 'jleemiranda531@gmail.com', name: 'Josey Miranda', phone: '(804) 555-0307' },
+  { email: 'miranda.magdiel@gmail.com', name: 'Magdiel Sampson', phone: '(804) 555-0308' },
+  { email: 'nohelytradiciones@gmal.com', name: 'Nohely Gonzales', phone: '(804) 555-0309' },
+  { email: 'aronjimenez@tradicion.org', name: 'Aron Jimenez', phone: '(804) 555-0310' },
+
+  // Demo Roster Dancers
   { email: 'mateo.silva@tradicion.org', name: 'Mateo Silva', phone: '(804) 555-0142' },
   { email: 'sofia.reyes@tradicion.org', name: 'Sofia Reyes', phone: '(804) 555-0189' },
   { email: 'carlos.mendoza@tradicion.org', name: 'Carlos Mendoza', phone: '(804) 555-0211' },

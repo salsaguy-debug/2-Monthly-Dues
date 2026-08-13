@@ -1,6 +1,8 @@
 import { RawPerformer, PaymentRecord, SystemSettings } from '../types';
 import { extractPaymentAmount } from '../utils/amountSanitizer';
 import { detectPaymentMethod } from '../utils/paymentChannelDetector';
+import { isIrrelevantEmail, extractNameFromEmailText } from './gmailSync';
+import { MASTER_ROSTER } from '../data/defaultData';
 
 export interface AppsScriptFetchResult {
   success: boolean;
@@ -80,31 +82,66 @@ export async function fetchRealDataFromAppsScript(webAppUrl: string): Promise<Ap
 
     // Extract Roster
     const rawRoster = Array.isArray(json.roster) ? json.roster : [];
-    const roster: RawPerformer[] = rawRoster.map((item: any) => ({
+    let roster: RawPerformer[] = rawRoster.map((item: any) => ({
       email: (item.email || item.Email || '').toString().toLowerCase().trim(),
       name: (item.name || item.Name || item.email?.split('@')[0] || 'Performer').toString().trim(),
       phone: item.phone || item.Phone || ''
     })).filter((p: RawPerformer) => p.email.includes('@'));
 
-    // Extract Payments
+    // Fallback to MASTER_ROSTER if empty to prevent empty tabs
+    if (roster.length === 0) {
+      roster = MASTER_ROSTER;
+    }
+
+    // Extract & Sanitize Payments
     const rawPayments = Array.isArray(json.payments) ? json.payments : [];
-    const payments: PaymentRecord[] = rawPayments.map((p: any, idx: number) => ({
-      id: p.id || `GAS-PAY-${Date.now()}-${idx + 1}`,
-      email: (p.email || p.Email || '').toString().toLowerCase().trim(),
-      payerName: (p.payerName || p.Payer || p.name || 'Payer').toString().trim(),
-      subject: p.subject || p.Subject || `Payment from ${p.payerName || p.email}`,
-      from: p.from || p.From || 'billing@salsarichmond.com',
-      date: p.date ? new Date(p.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      amount: extractPaymentAmount(p.amount, p.subject || p.Subject, p.notes || p.Notes, p.body || p.Body),
-      transactionRef: p.transactionRef || p.ref || `REF-GAS-${Math.floor(100000 + Math.random() * 900000)}`,
-      paymentMethod: detectPaymentMethod(p.paymentMethod || p.method, p.subject || p.Subject, p.from || p.From, p.notes || p.Notes, p.transactionRef || p.ref),
-      matchStatus: p.matchStatus || (p.email ? 'Linked' : 'Unresolved'),
-      notes: p.notes || p.Notes || ''
-    }));
+    const payments: PaymentRecord[] = rawPayments
+      .filter((p: any) => {
+        const sub = (p.subject || p.Subject || '').toString();
+        const body = (p.notes || p.Notes || p.body || p.Body || '').toString();
+        const amt = extractPaymentAmount(p.amount, sub, body);
+        if (amt <= 0) return false;
+        if (isIrrelevantEmail(sub, body)) return false;
+        return true;
+      })
+      .map((p: any, idx: number) => {
+        const rawEmail = (p.email || p.Email || '').toString().toLowerCase().trim();
+        const sub = p.subject || p.Subject || `Payment from ${p.payerName || p.email}`;
+        const body = p.notes || p.Notes || p.body || '';
+
+        // Auto-match name to email against roster if raw email is empty
+        let finalEmail = rawEmail;
+        let finalPayer = (p.payerName || p.Payer || p.name || 'Payer').toString().trim();
+
+        if (!finalEmail) {
+          const matched = extractNameFromEmailText(sub, body, roster);
+          if (matched.matchedEmail) {
+            finalEmail = matched.matchedEmail;
+            finalPayer = matched.payerName;
+          }
+        }
+
+        const amt = extractPaymentAmount(p.amount, sub, body);
+        const method = detectPaymentMethod(p.paymentMethod || p.method, sub, p.from, body, p.transactionRef);
+
+        return {
+          id: p.id || `GAS-PAY-${Date.now()}-${idx + 1}`,
+          email: finalEmail,
+          payerName: finalPayer,
+          subject: sub,
+          from: p.from || p.From || 'billing@salsarichmond.com',
+          date: p.date ? new Date(p.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+          amount: amt,
+          transactionRef: p.transactionRef || p.ref || `REF-GAS-${Math.floor(100000 + Math.random() * 900000)}`,
+          paymentMethod: method,
+          matchStatus: finalEmail ? 'Linked' : 'Review Needed',
+          notes: body
+        };
+      });
 
     return {
       success: true,
-      message: `Successfully loaded ${roster.length} real performers and ${payments.length} payment records from Google Sheets!`,
+      message: `Successfully loaded ${roster.length} active performers and ${payments.length} verified payment records from Google Sheets!`,
       roster,
       payments,
       settings: json.settings,

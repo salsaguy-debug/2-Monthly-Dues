@@ -23,6 +23,7 @@ import { UserGuideModal } from './components/UserGuideModal';
 import { ExcludedPerformersModal } from './components/ExcludedPerformersModal';
 import { CalculatorModal } from './components/CalculatorModal';
 import { WidgetModal } from './components/WidgetModal';
+import { isIrrelevantEmail, extractNameFromEmailText } from './services/gmailSync';
 import { Calculator } from 'lucide-react';
 
 export default function App() {
@@ -112,18 +113,46 @@ export default function App() {
   // Helper functions to merge local and remote data without overwriting local changes
   const mergePaymentsData = (local: PaymentRecord[], remote: PaymentRecord[]): PaymentRecord[] => {
     const map = new Map<string, PaymentRecord>();
-    for (const p of remote) {
-      if (p && p.id) map.set(p.id, p);
-    }
-    // Local records take precedence to preserve local additions and edits
-    for (const p of local) {
-      if (p && p.id) map.set(p.id, p);
+    const currentRoster = roster.length > 0 ? roster : MASTER_ROSTER;
+
+    for (const p of [...remote, ...local]) {
+      if (!p || !p.id) continue;
+      const sub = p.subject || '';
+      const notes = p.notes || '';
+
+      // Skip irrelevant marketing or security alert emails
+      if (isIrrelevantEmail(sub, notes)) continue;
+      if (p.amount <= 0) continue;
+
+      let email = (p.email || '').toLowerCase().trim();
+      let payerName = p.payerName;
+      let matchStatus = p.matchStatus;
+
+      if (!email) {
+        const matched = extractNameFromEmailText(sub, notes, currentRoster);
+        if (matched.matchedEmail) {
+          email = matched.matchedEmail;
+          payerName = matched.payerName;
+          matchStatus = 'Linked';
+        }
+      }
+
+      map.set(p.id, {
+        ...p,
+        email,
+        payerName: payerName || p.payerName,
+        matchStatus: matchStatus || (email ? 'Linked' : 'Review Needed')
+      });
     }
     return Array.from(map.values());
   };
 
   const mergeRosterData = (local: RawPerformer[], remote: RawPerformer[]): RawPerformer[] => {
     const map = new Map<string, RawPerformer>();
+    // Always seed MASTER_ROSTER so active performers are preserved
+    for (const r of MASTER_ROSTER) {
+      if (r && r.email) map.set(r.email.toLowerCase().trim(), r);
+    }
     for (const r of remote) {
       if (r && r.email) map.set(r.email.toLowerCase().trim(), r);
     }

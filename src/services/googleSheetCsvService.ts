@@ -1,6 +1,8 @@
 import { RawPerformer, PaymentRecord } from '../types';
 import { extractPaymentAmount } from '../utils/amountSanitizer';
 import { detectPaymentMethod } from '../utils/paymentChannelDetector';
+import { isIrrelevantEmail, extractNameFromEmailText } from './gmailSync';
+import { MASTER_ROSTER } from '../data/defaultData';
 
 export const DEFAULT_PERFORMER_PAYMENTS_SHEET_URL = 
   'https://docs.google.com/spreadsheets/d/1eaEttUh8JZPyoY61HLHpf5UxhgEltK9oU5bwUNyDwwU/edit?gid=1439899564#gid=1439899564';
@@ -83,7 +85,7 @@ export async function fetchPerformerPaymentsFromSheet(sheetUrl: string): Promise
       return {
         success: false,
         message: 'Google Sheet tab appears to be empty or contains header row only.',
-        roster: [],
+        roster: MASTER_ROSTER,
         payments: [],
         timestamp: new Date().toISOString()
       };
@@ -100,18 +102,35 @@ export async function fetchPerformerPaymentsFromSheet(sheetUrl: string): Promise
     const refIdx = headers.findIndex(h => h.includes('ref') || h.includes('note') || h.includes('transaction'));
 
     const rosterMap = new Map<string, RawPerformer>();
+    MASTER_ROSTER.forEach(p => rosterMap.set(p.email.toLowerCase(), p));
+
     const payments: PaymentRecord[] = [];
 
     for (let i = 1; i < lines.length; i++) {
       const cols = parseCsvLine(lines[i]);
       if (cols.length === 0) continue;
 
-      const email = (emailIdx >= 0 && cols[emailIdx] ? cols[emailIdx] : '').toLowerCase().trim();
-      const name = (nameIdx >= 0 && cols[nameIdx] ? cols[nameIdx] : email.split('@')[0] || 'Performer').trim();
+      let email = (emailIdx >= 0 && cols[emailIdx] ? cols[emailIdx] : '').toLowerCase().trim();
+      let name = (nameIdx >= 0 && cols[nameIdx] ? cols[nameIdx] : '').trim();
       const rawChannel = channelIdx >= 0 && cols[channelIdx] ? cols[channelIdx] : 'Venmo';
       const rawAmount = amountIdx >= 0 && cols[amountIdx] ? cols[amountIdx] : '0';
       const rawDate = dateIdx >= 0 && cols[dateIdx] ? cols[dateIdx] : new Date().toISOString().split('T')[0];
       const rawNotes = refIdx >= 0 && cols[refIdx] ? cols[refIdx] : '';
+
+      // Skip non-payment or marketing / security alert rows
+      if (isIrrelevantEmail(name + ' ' + rawNotes, rawNotes)) continue;
+
+      const amount = extractPaymentAmount(rawAmount, rawNotes, rawNotes, rawNotes);
+      if (amount <= 0) continue;
+
+      const activeRosterArray = Array.from(rosterMap.values());
+      if (!email) {
+        const matched = extractNameFromEmailText(name || rawNotes, rawNotes, activeRosterArray);
+        if (matched.matchedEmail) {
+          email = matched.matchedEmail;
+          name = matched.payerName;
+        }
+      }
 
       if (email && email.includes('@')) {
         if (!rosterMap.has(email)) {
@@ -122,7 +141,6 @@ export async function fetchPerformerPaymentsFromSheet(sheetUrl: string): Promise
           });
         }
 
-        const amount = extractPaymentAmount(rawAmount, rawNotes, rawNotes, rawNotes);
         const method = detectPaymentMethod(rawChannel, rawNotes, email, rawNotes, rawNotes);
         const formattedDate = rawDate && !isNaN(Date.parse(rawDate)) 
           ? new Date(rawDate).toISOString().split('T')[0] 
@@ -158,7 +176,7 @@ export async function fetchPerformerPaymentsFromSheet(sheetUrl: string): Promise
     return {
       success: false,
       message: `Failed to fetch Google Sheet CSV: ${error.message || 'Network error or sharing settings constraint'}. Ensure the sheet link or tab is set to "Anyone with the link can view".`,
-      roster: [],
+      roster: MASTER_ROSTER,
       payments: [],
       timestamp: new Date().toISOString()
     };

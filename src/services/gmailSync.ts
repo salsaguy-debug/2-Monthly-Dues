@@ -35,6 +35,42 @@ function decodeBase64Url(base64Url: string): string {
   }
 }
 
+/**
+ * Filter out non-payment marketing notifications, security alerts, bank connection emails,
+ * outbound payments, request emails, and non-performer topics.
+ */
+export function isIrrelevantEmail(subject: string, bodyText: string): boolean {
+  const fullText = (subject + ' ' + bodyText).toLowerCase();
+
+  // Exclude marketing, promotional, and referral offers
+  const marketingPhrases = [
+    "don't forget: $", "wanna make $", "bonus offer", "cash back",
+    "summer heat", "taco bell", "game time", "referral", "bonus",
+    "what's the crew", "last call", "whatnot"
+  ];
+  if (marketingPhrases.some(p => fullText.includes(p))) return true;
+
+  // Exclude account, security, device, and bank transfer notifications
+  const securityPhrases = [
+    "new device login", "device added", "bank was added", "bank account has been added",
+    "connected your bank", "backup payment method", "updated your preferred",
+    "transfer has been initiated", "upcoming changes to", "transaction history",
+    "statement", "login", "remembered device", "card ending in"
+  ];
+  if (securityPhrases.some(p => fullText.includes(p))) return true;
+
+  // Exclude payment requests, outgoing payments, and expired transfers
+  const outboundOrRequestPhrases = [
+    "requests $", "requested $", "payment to", "expired", "you paid"
+  ];
+  if (outboundOrRequestPhrases.some(p => fullText.includes(p))) return true;
+
+  // Exclude non-dues email topics
+  if (fullText.includes("va disability assistance")) return true;
+
+  return false;
+}
+
 // Extracts clean payer name from subject or body based on roster & sanitization rules
 export function extractNameFromEmailText(
   subject: string,
@@ -42,21 +78,38 @@ export function extractNameFromEmailText(
   roster: RawPerformer[]
 ): { payerName: string; matchedEmail: string } {
   const fullText = (subject + ' ' + bodyText).replace(/\n/g, ' ');
+  const lowerFull = fullText.toLowerCase();
 
-  // 1. Check if any performer name or email appears directly in fullText
+  // 1. Direct name, email, or email username match
   for (const perf of roster) {
-    if (!perf.name) continue;
-    const nameLower = perf.name.toLowerCase().trim();
+    if (!perf.name && !perf.email) continue;
+    const nameLower = (perf.name || '').toLowerCase().trim();
     const emailLower = (perf.email || '').toLowerCase().trim();
-    if (nameLower && fullText.toLowerCase().includes(nameLower)) {
+    const emailUser = emailLower.split('@')[0];
+
+    if (nameLower && lowerFull.includes(nameLower)) {
       return { payerName: perf.name, matchedEmail: perf.email };
     }
-    if (emailLower && fullText.toLowerCase().includes(emailLower)) {
+    if (emailLower && lowerFull.includes(emailLower)) {
+      return { payerName: perf.name, matchedEmail: perf.email };
+    }
+    if (emailUser.length >= 4 && lowerFull.includes(emailUser)) {
       return { payerName: perf.name, matchedEmail: perf.email };
     }
   }
 
-  // 2. Parse common payment phrasing with Regex
+  // 2. Token / word matching against roster names (e.g., "Meyboll", "Febres", "Sampson", "Gonzales")
+  for (const perf of roster) {
+    const nameParts = (perf.name || '').toLowerCase().split(/\s+/).filter(p => p.length >= 4);
+    for (const part of nameParts) {
+      if (['paid', 'from', 'with', 'your', 'sent', 'text', 'message'].includes(part)) continue;
+      if (lowerFull.includes(part)) {
+        return { payerName: perf.name, matchedEmail: perf.email };
+      }
+    }
+  }
+
+  // 3. Parse common payment phrasing with Regex
   let rawPayer = 'Unknown Payer';
   const cleanSub = subject.replace(/Fwd:|Re:|\[.*?\]/gi, '').trim();
   const lowerSub = cleanSub.toLowerCase();
@@ -160,8 +213,6 @@ export async function syncGmailPayments(
     const fromHeader = getHeader('From');
     const dateHeader = getHeader('Date');
 
-    if (subject.toLowerCase().includes('statement')) continue;
-
     // Decode Body
     let bodyText = msg.snippet || '';
     if (msg.payload.body?.data) {
@@ -175,31 +226,14 @@ export async function syncGmailPayments(
       }
     }
 
-    const singleLineText = (subject + ' ' + bodyText).replace(/\n/g, ' ');
-
-    const textLower = singleLineText.toLowerCase();
-
-    // Flexible payment indicator check (since Gmail API already searched with the user's query)
-    const isPayment = 
-      textLower.includes('paid') ||
-      textLower.includes('payment') ||
-      textLower.includes('sent') ||
-      textLower.includes('received') ||
-      textLower.includes('venmo') ||
-      textLower.includes('cash') ||
-      textLower.includes('salsa') ||
-      textLower.includes('zelle') ||
-      textLower.includes('paypal') ||
-      textLower.includes('deposit') ||
-      textLower.includes('transfer') ||
-      textLower.includes('dues') ||
-      textLower.includes('receipt') ||
-      textLower.includes('$');
-
-    if (!isPayment) continue;
+    // Skip irrelevant marketing, security, outbound, request, or statement emails
+    if (isIrrelevantEmail(subject, bodyText)) continue;
 
     // Parse Amount ($15, $15.00, 15.00 USD, 15 USD, etc.)
     const amount = extractPaymentAmount(0, subject, '', bodyText);
+
+    // Skip zero amount emails
+    if (amount <= 0) continue;
 
     // Payment Channel
     const paymentMethod = detectPaymentMethod('', subject, fromHeader, bodyText);
