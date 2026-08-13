@@ -4,8 +4,8 @@
 ### 📌 Project Overview
 This repository contains the executive financial management platform, performer monthly dues tracker, Zelle/Venmo payment intake, and Google Apps Script sync for **Tradición Dance Co.**
 
-* **GitHub Repository**: [https://github.com/salsaguy-debug/monthly-dues](https://github.com/salsaguy-debug/monthly-dues)
-* **Live GitHub Pages App**: [https://salsaguy-debug.github.io/monthly-dues/](https://salsaguy-debug.github.io/monthly-dues/)
+* **GitHub Repository**: [https://github.com/salsaguy-debug/2-Monthly-Dues](https://github.com/salsaguy-debug/2-Monthly-Dues)
+* **Live GitHub Pages App**: [https://salsaguy-debug.github.io/2-Monthly-Dues/](https://salsaguy-debug.github.io/2-Monthly-Dues/)
 
 ---
 
