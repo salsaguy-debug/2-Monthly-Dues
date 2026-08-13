@@ -330,10 +330,43 @@ export const BentoDashboard: React.FC<BentoDashboardProps> = ({
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-200">
               {sortedAndFilteredPerformers.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400 dark:text-slate-500 italic">
-                    <div className="flex flex-col items-center gap-2">
-                      <Filter className="w-6 h-6 text-slate-300 dark:text-slate-600" />
-                      <p>{language === 'es' ? 'No se encontraron integrantes con los filtros seleccionados.' : 'No performers found matching search criteria.'}</p>
+                  <td colSpan={8} className="py-12 text-center text-slate-400 dark:text-slate-500">
+                    <div className="flex flex-col items-center justify-center gap-3 max-w-md mx-auto p-4">
+                      <div className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-inner">
+                        <Filter className="w-6 h-6" />
+                      </div>
+                      <div className="space-y-1 text-center">
+                        <p className="font-extrabold text-sm text-slate-800 dark:text-slate-200">
+                          {language === 'es' ? 'No se encontraron integrantes con los filtros seleccionados.' : 'No performers found matching search criteria.'}
+                        </p>
+                        {(searchTerm.trim() || emailFilter !== 'ALL' || statusFilter !== 'ALL') ? (
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            {language === 'es'
+                              ? 'Intente modificar la búsqueda o limpiar los filtros activos.'
+                              : 'Try adjusting your search keywords or clearing active filters.'}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            {language === 'es'
+                              ? 'No hay bailarines en la lista activa del sistema.'
+                              : 'There are currently no active performers in the roster.'}
+                          </p>
+                        )}
+                      </div>
+
+                      {(searchTerm.trim() || emailFilter !== 'ALL' || statusFilter !== 'ALL') && (
+                        <button
+                          onClick={() => {
+                            setSearchTerm('');
+                            setEmailFilter('ALL');
+                            setStatusFilter('ALL');
+                          }}
+                          className="mt-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center gap-2 cursor-pointer"
+                        >
+                          <X className="w-4 h-4" />
+                          <span>{language === 'es' ? 'Limpiar Filtros y Búsqueda' : 'Clear Filters & Search'}</span>
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

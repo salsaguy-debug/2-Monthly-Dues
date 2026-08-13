@@ -6,6 +6,10 @@ import {
   saveAppsScriptUrl 
 } from '../services/appsScriptService';
 import { 
+  fetchPerformerPaymentsFromSheet, 
+  DEFAULT_PERFORMER_PAYMENTS_SHEET_URL 
+} from '../services/googleSheetCsvService';
+import { 
   Database, 
   X, 
   RefreshCw, 
@@ -19,7 +23,8 @@ import {
   CreditCard,
   Code2,
   Copy,
-  Check
+  Check,
+  FileSpreadsheet
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -39,6 +44,8 @@ export const LoadRealDataModal: React.FC<LoadRealDataModalProps> = ({
   currentPaymentsCount
 }) => {
   const { language } = useLanguage();
+  const [syncMode, setSyncMode] = useState<'sheet_csv' | 'apps_script'>('sheet_csv');
+  const [sheetUrl, setSheetUrl] = useState(DEFAULT_PERFORMER_PAYMENTS_SHEET_URL);
   const [webAppUrl, setWebAppUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -61,26 +68,43 @@ export const LoadRealDataModal: React.FC<LoadRealDataModalProps> = ({
   if (!isOpen) return null;
 
   const handleFetchData = async () => {
-    if (!webAppUrl.trim()) {
-      setFetchError(language === 'es' ? 'Ingrese la URL de la aplicación web de Google Apps Script.' : 'Please enter your Google Apps Script Web App URL.');
-      return;
-    }
-
     setIsLoading(true);
     setFetchError(null);
     setPreviewData(null);
 
-    const result = await fetchRealDataFromAppsScript(webAppUrl);
-
-    if (result.success) {
-      setPreviewData({
-        roster: result.roster,
-        payments: result.payments,
-        summary: result.summary,
-        message: result.message
-      });
+    if (syncMode === 'sheet_csv') {
+      if (!sheetUrl.trim()) {
+        setFetchError(language === 'es' ? 'Ingrese la URL del Google Sheet.' : 'Please enter a valid Google Sheet URL.');
+        setIsLoading(false);
+        return;
+      }
+      const result = await fetchPerformerPaymentsFromSheet(sheetUrl);
+      if (result.success) {
+        setPreviewData({
+          roster: result.roster,
+          payments: result.payments,
+          message: result.message
+        });
+      } else {
+        setFetchError(result.message);
+      }
     } else {
-      setFetchError(result.message);
+      if (!webAppUrl.trim()) {
+        setFetchError(language === 'es' ? 'Ingrese la URL de la aplicación web de Google Apps Script.' : 'Please enter your Google Apps Script Web App URL.');
+        setIsLoading(false);
+        return;
+      }
+      const result = await fetchRealDataFromAppsScript(webAppUrl);
+      if (result.success) {
+        setPreviewData({
+          roster: result.roster,
+          payments: result.payments,
+          summary: result.summary,
+          message: result.message
+        });
+      } else {
+        setFetchError(result.message);
+      }
     }
 
     setIsLoading(false);
@@ -157,39 +181,107 @@ export const LoadRealDataModal: React.FC<LoadRealDataModalProps> = ({
             </p>
           </div>
 
-          {/* Web App URL Input */}
-          <div className="space-y-2">
-            <label className="text-xs font-extrabold uppercase text-slate-800 tracking-wider flex items-center justify-between">
-              <span>{language === 'es' ? 'URL de la Aplicación Web (Google Apps Script)' : 'Google Apps Script Web App URL'}</span>
-              <span className="text-[10px] text-slate-400 font-normal">doGet Endpoint</span>
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="url"
-                value={webAppUrl}
-                onChange={(e) => setWebAppUrl(e.target.value)}
-                placeholder="https://script.google.com/macros/s/AKfycb.../exec"
-                className="flex-1 text-xs font-mono p-3 bg-slate-50 border border-slate-300 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-hidden"
-              />
-              <button
-                onClick={handleFetchData}
-                disabled={isLoading}
-                className="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-extrabold text-xs rounded-2xl shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 shrink-0"
-              >
-                {isLoading ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>{language === 'es' ? 'Conectando...' : 'Fetching...'}</span>
-                  </>
-                ) : (
-                  <>
-                    <CloudDownload className="w-4 h-4" />
-                    <span>{language === 'es' ? 'Obtener Datos' : 'Fetch Real Data'}</span>
-                  </>
-                )}
-              </button>
-            </div>
+          {/* Mode Selector Tabs */}
+          <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200 gap-1 text-xs">
+            <button
+              type="button"
+              onClick={() => setSyncMode('sheet_csv')}
+              className={`flex-1 py-2.5 px-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                syncMode === 'sheet_csv'
+                  ? 'bg-white text-indigo-700 shadow-sm border border-slate-200 font-extrabold'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+              <span>{language === 'es' ? 'Google Sheet CSV (Directo)' : 'Google Sheet CSV (Direct)'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSyncMode('apps_script')}
+              className={`flex-1 py-2.5 px-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                syncMode === 'apps_script'
+                  ? 'bg-white text-indigo-700 shadow-sm border border-slate-200 font-extrabold'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Code2 className="w-4 h-4 text-indigo-600" />
+              <span>{language === 'es' ? 'Google Apps Script (Web App)' : 'Apps Script Web App'}</span>
+            </button>
           </div>
+
+          {/* Sync Mode Specific Inputs */}
+          {syncMode === 'sheet_csv' ? (
+            <div className="space-y-2">
+              <label className="text-xs font-extrabold uppercase text-slate-800 tracking-wider flex items-center justify-between">
+                <span>{language === 'es' ? 'URL del Google Sheet (Pestaña "Performer Payments")' : 'Google Sheet URL ("Performer Payments" Tab)'}</span>
+                <span className="text-[10px] text-emerald-600 font-bold font-mono">100% Match Accuracy</span>
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={sheetUrl}
+                  onChange={(e) => setSheetUrl(e.target.value)}
+                  placeholder="https://docs.google.com/spreadsheets/d/1eaEtt.../edit?gid=1439899564"
+                  className="flex-1 text-xs font-mono p-3 bg-slate-50 border border-slate-300 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:bg-white focus:outline-hidden"
+                />
+                <button
+                  onClick={handleFetchData}
+                  disabled={isLoading}
+                  className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-extrabold text-xs rounded-2xl shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 shrink-0"
+                >
+                  {isLoading ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>{language === 'es' ? 'Cargando...' : 'Loading...'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <CloudDownload className="w-4 h-4" />
+                      <span>{language === 'es' ? 'Importar CSV' : 'Import Sheet Data'}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              <p className="text-[10px] text-slate-500 italic">
+                {language === 'es'
+                  ? 'Asegúrese de que el enlace tenga la pestaña con permiso "Cualquier persona con el enlace puede ver".'
+                  : 'Ensure the spreadsheet tab is set to "Anyone with the link can view".'}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <label className="text-xs font-extrabold uppercase text-slate-800 tracking-wider flex items-center justify-between">
+                <span>{language === 'es' ? 'URL de la Aplicación Web (Google Apps Script)' : 'Google Apps Script Web App URL'}</span>
+                <span className="text-[10px] text-slate-400 font-normal">doGet Endpoint</span>
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={webAppUrl}
+                  onChange={(e) => setWebAppUrl(e.target.value)}
+                  placeholder="https://script.google.com/macros/s/AKfycb.../exec"
+                  className="flex-1 text-xs font-mono p-3 bg-slate-50 border border-slate-300 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-hidden"
+                />
+                <button
+                  onClick={handleFetchData}
+                  disabled={isLoading}
+                  className="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-extrabold text-xs rounded-2xl shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 shrink-0"
+                >
+                  {isLoading ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>{language === 'es' ? 'Conectando...' : 'Fetching...'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <CloudDownload className="w-4 h-4" />
+                      <span>{language === 'es' ? 'Obtener Datos' : 'Fetch Real Data'}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Error Message */}
           {fetchError && (
